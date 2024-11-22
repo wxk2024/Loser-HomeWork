@@ -1069,9 +1069,9 @@ X
 根据我们的提示 **名字查找**，我看大家多少都还是能查到一些东西。我们慢慢说吧，首先名字查找分为：**有限定** 名字查找，**无限定** 名字查找。
 
 > 有限定名字查找指？
->  
+>
 > 出现在作用域解析操作符 `::` 右边的名字是限定名（参阅有限定的标识符）。 限定名可能代表的是：
->  
+>
 > - 类的成员（包括静态和非静态函数、类型和模板等）
 > - 命名空间的成员（包括其他的命名空间）
 > - 枚举项
@@ -2088,10 +2088,14 @@ int main(){
 
 <br>
 
-当然了，我们也可以利用预处理器，来进行兼容。**原理**：
+当然了，我们也可以利用预处理指令 [`#pragma comment`](https://learn.microsoft.com/zh-cn/cpp/preprocessor/comment-c-cpp?view=msvc-170)，来特殊处理 MSVC。**原理**：
 
-- Itanium ABI 上变量 ss::a 的重整名为 _ZN2ss1aE。
-- 在 MSVC 上需要用 #pragma 告诉链接器使用 MSVC ABI 的重整名 ?a@ss@@3HA。
+- [Itanium ABI](https://itanium-cxx-abi.github.io/cxx-abi/abi.html) 上变量 `ss::a` 的重整名为 `_ZN2ss1aE`。
+- 在 MSVC 可以使用 `#pragma comment` 添加 `/alternatename` 链接选项，指定在找不到符号 `?_ZN2ss1aE@@3HA` 时，使用符号 `?a@ss@@3HA` 作为替代。
+
+>`?a@ss@@3HA` 就是 `ss::a` 的符号，而 `?_ZN2ss1aE@@3HA` 就是 `extern int _ZN2ss1aE` 的符号。
+>
+>因为 `_ZN2ss1aE` 没有定义，所以必然没有符号 `?_ZN2ss1aE@@3HA` ，就使用 `?a@ss@@3HA` 作为替代，那么此时操作 `_ZN2ss1aE` 如同操作 `ss::a`。
 
 ```cpp
 #include<iostream>
@@ -2110,6 +2114,7 @@ int main() {
 }
 ```
 
+>
 > 来源：[聚聚](https://github.com/Mq-b/Loser-HomeWork/pull/194)。
 
 #### 直接修改内存
